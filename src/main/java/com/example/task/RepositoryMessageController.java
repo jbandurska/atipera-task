@@ -21,7 +21,8 @@ public class RepositoryMessageController {
     @GetMapping("/repository")
     public ResponseEntity<Message> repositoryMessage(
             @RequestParam(value = "username", defaultValue = "") String username,
-            @RequestHeader("Accept") String acceptHeader) {
+            @RequestHeader("Accept") String acceptHeader
+    ) {
 
         if (acceptHeader != null && acceptHeader.equalsIgnoreCase("application/xml")) return notAcceptableResponse();
 
@@ -41,8 +42,7 @@ public class RepositoryMessageController {
 
             if (connection.getResponseCode() == 404) return notFoundResponse();
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+            BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             ResponseEntity<Message> response = okResponse(input.readLine());
             input.close();
 
@@ -101,14 +101,13 @@ public class RepositoryMessageController {
             URL branchesUrl = new URL(cleanBranchesUrlString);
             HttpURLConnection connection = (HttpURLConnection) branchesUrl.openConnection();
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
+            BufferedReader input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             JSONArray branchesJSONArray = new JSONArray(input.readLine());
             input.close();
 
             for (int i = 0; i < branchesJSONArray.length(); i++) {
-                JSONObject branchJSON = branchesJSONArray.getJSONObject(i);
-                branches.add(getBranchInfo(branchJSON));
+                JSONObject branch = branchesJSONArray.getJSONObject(i);
+                branches.add(getBranchInfo(branch));
             }
 
             return branches;
@@ -117,10 +116,10 @@ public class RepositoryMessageController {
         }
     }
 
-    public BranchInfo getBranchInfo(JSONObject branchJSON) {
+    public BranchInfo getBranchInfo(JSONObject branch) {
         try {
-            String name = branchJSON.getString("name");
-            String lastCommitSha = branchJSON.getJSONObject("commit").getString("sha");
+            String name = branch.getString("name");
+            String lastCommitSha = branch.getJSONObject("commit").getString("sha");
             return new BranchInfo(name, lastCommitSha);
         } catch (Exception e) {
             throw new Error(e);
